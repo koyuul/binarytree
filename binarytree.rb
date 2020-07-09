@@ -1,5 +1,6 @@
+require 'pry'
 class Node
-  attr_accessor :level, :position, :value, :parent
+  attr_accessor :level, :position, :value, :parent, :left_child, :right_child, :children
   def initialize(value=nil, parent=nil)
     if parent.nil?
       @level = 0
@@ -11,19 +12,21 @@ class Node
     @children = 0
     @position = nil
     p "NEW NODE FROM NODE CLASS: #{self.inspect}"
+    @left_child = nil
+    @right_child = nil
   end
   
   def spawnChild(value)
-    if @children == 0
-      left_child = Node.new(value, self)
-      left_child.position = 0
+    if value < @value 
+      @left_child = Node.new(value, self)
+      @left_child.position = 0
       @children+=1
-      return left_child
-    elsif @children == 1
-      right_child = Node.new(value, self)
-      right_child.position = 1
+      return @left_child
+    elsif value > @value || @value == value
+      @right_child = Node.new(value, self)
+      @right_child.position = 1
       @children+=1
-      return right_child
+      return @right_child
     else return "Too many children"
     end
 
@@ -47,6 +50,10 @@ class Tree
     if @root.nil? 
         @root = Node.new(median(arr.uniq.sort)) 
         @parent = @root
+    elsif arr.length == 1
+      child = @parent.spawnChild(arr[0])
+      @parent = child.parent
+      return child.parent
     elsif arr.length == 2 #if theres two in array, spawn child which spawns another child
         p "CASE 1 arr: #{arr}"
         child = @parent.spawnChild(arr[0])
@@ -68,6 +75,24 @@ class Tree
     return @root
   end
 
+  def insert(val)
+    puts "\n\n\n\n\n\n"
+    analyzer = @root
+    until analyzer.children==0
+      if val < analyzer.value
+        p analyzer.left_child
+        analyzer = analyzer.left_child
+      elsif val > analyzer.value
+        p analyzer.right_child
+        analyzer = analyzer.right_child
+      end 
+    end 
+    return analyzer.spawnChild(val)
+  end
+
+  
 end
 
-Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]).build_tree
+tree =Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
+built_tree = tree.build_tree
+tree.insert(2)
